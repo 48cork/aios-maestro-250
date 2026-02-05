@@ -1,12 +1,13 @@
 import os
 from dotenv import load_dotenv
 from groq import Groq
+from datetime import datetime
 
-# 1. Configurações Iniciais
+# 1. Carrega as chaves do .env
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Definição dos Batalhões (Fatiamento dos 250 Agentes)
+# 2. Define a estratégia de fatiamento dos 250 agentes
 BATALHOES = {
     "001-050": "Especialistas em Curiosidade (Atração no Pinterest/TikTok)",
     "051-100": "Engenheiros de Comparação (Ted vs. Projetos Comuns)",
@@ -16,35 +17,45 @@ BATALHOES = {
 }
 
 def executar_swarm_ted():
-    print("🪓 INICIANDO OPERAÇÃO: TED'S WOODWORKING SWARM")
-    print(f"{'='*50}")
+    # Define o nome do arquivo de saída
+    nome_arquivo = "output_ted_woodworking.txt"
+    data_atual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    
+    print(f"🪓 OPERAÇÃO INICIADA - Gravando em {nome_arquivo}")
+    
+    # 3. Abre/Cria o arquivo de texto para salvar a produção
+    with open(nome_arquivo, "w", encoding="utf-8") as f:
+        f.write(f"--- RELATÓRIO DO MAESTRO - SWARM 250 AGENTES ---\n")
+        f.write(f"PRODUTO: Ted's Woodworking | DATA: {data_atual}\n")
+        f.write("="*50 + "\n\n")
 
-    for faixa, especialidade in BATALHOES.items():
-        print(f"\n🚀 Ativando Agentes {faixa}: {especialidade}...")
-        
-        try:
-            prompt = f"""
-            Você está operando como os Agentes {faixa}, parte de um enxame de 250 IAs.
-            Seu objetivo é vender o produto Ted's Woodworking (Clickbank).
-            Sua especialidade hoje: {especialidade}.
-            Gere 3 exemplos de alta conversão focados especificamente na sua área.
-            """
-
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": "Você é uma célula de inteligência do Swarm AIOS Sergio."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-            )
+        # 4. Loop que percorre cada batalhão
+        for faixa, especialidade in BATALHOES.items():
+            print(f"🚀 Ativando Batalhão {faixa}...")
             
-            print(f"🤖 RESPOSTA DOS AGENTES {faixa}:")
-            print(completion.choices[0].message.content)
-            print("-" * 30)
+            try:
+                # O Maestro dá a ordem específica para cada grupo
+                prompt = f"Gere 3 estratégias de alta conversão para o Ted's Woodworking como se você fosse 50 agentes focados em: {especialidade}."
 
-        except Exception as e:
-            print(f"⚠️ Erro no Batalhão {faixa}: {e}")
+                completion = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": "Você é o Maestro do Swarm Sergio Farias. Entregue conteúdo pronto para copiar e colar."},
+                        {"role": "user", "content": prompt}
+                    ],
+                )
+                
+                resposta = completion.choices[0].message.content
+                
+                # Escreve os resultados no arquivo TXT
+                f.write(f"### BATALHÃO {faixa}: {especialidade} ###\n")
+                f.write(resposta + "\n")
+                f.write("-" * 50 + "\n\n")
+                
+            except Exception as e:
+                f.write(f"⚠️ Erro no Batalhão {faixa}: {e}\n")
+
+    print(f"\n✅ SUCESSO! O arquivo '{nome_arquivo}' foi gerado.")
 
 if __name__ == "__main__":
     executar_swarm_ted()

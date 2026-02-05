@@ -1,39 +1,40 @@
-import subprocess
 import os
 import time
+from dotenv import load_dotenv
+from groq import Groq
 
-def rodar_swarm_total():
-    os.environ["GROQ_API_KEY"] = "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"
-    venv_python = os.path.join(".venv", "Scripts", "python.exe")
-    if not os.path.exists(venv_python): venv_python = "python"
+# 1. Carrega as configurações do arquivo .env
+load_dotenv()
 
-    print("\n" + "█"*60)
-    print("🚀 AIOS-SERGIO: SISTEMA AUTÔNOMO DE INTELIGÊNCIA DE MERCADO")
-    print("█"*60)
+# 2. Puxa a chave de forma segura
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-    # 1. TREND-HUNTER
-    print("\n📡 [1/4] TREND-HUNTER: Caçando novidades...")
-    subprocess.run([venv_python, "trend_hunter.py"])
+if not GROQ_API_KEY:
+    print("❌ ERRO: Chave GROQ_API_KEY não encontrada no arquivo .env")
+    exit()
+
+# 3. Inicializa o cliente da Groq
+client = Groq(api_key=GROQ_API_KEY)
+
+def main():
+    print("🚀 Iniciando Sistema Maestro - Swarm de 250 Agentes")
+    print("--------------------------------------------------")
     
-    # 2. SPY-AD
-    print("\n🕵️ [2/4] SPY-AD: Espionando criativos...")
-    subprocess.run([venv_python, "spy_ad.py"])
-    
-    # 3. WORKER (MINERAÇÃO)
-    print("\n💰 [3/4] WORKER: Minerando preços na página de vendas...")
-    if os.path.exists("swarm_database.json"): os.remove("swarm_database.json")
-    subprocess.run([venv_python, "worker.py"])
-    
-    # 4. FUNNEL-BREAKER
-    print("\n⚔️ [4/4] FUNNEL-BREAKER: Mapeando upsells escondidos...")
-    subprocess.run([venv_python, "funnel_breaker.py"])
-    
-    # RELATÓRIO FINAL CONSOLIDADO
-    print("\n" + "█"*60)
-    print("📊 GERANDO RELATÓRIO 360 GRAUS...")
-    print("█"*60)
-    time.sleep(1)
-    subprocess.run([venv_python, "resumo.py"])
+    try:
+        # 4. Chamada com o modelo mais estável da família Llama 3
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile", 
+            messages=[
+                {"role": "system", "content": "Você é o Maestro do Swarm AIOS, focado em alta produtividade."},
+                {"role": "user", "content": "Status do sistema? Os 250 agentes estão prontos?"}
+            ],
+        )
+        
+        print(f"🤖 RESPOSTA DO MAESTRO: {completion.choices[0].message.content}")
+        print("\n✅ Conexão estabelecida com sucesso!")
+        
+    except Exception as e:
+        print(f"⚠️ Ocorreu um erro na execução: {e}")
 
 if __name__ == "__main__":
-    rodar_swarm_total()
+    main()
